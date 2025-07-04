@@ -40,12 +40,12 @@ const socialLinks = [
 ];
 
 const Footer = () => (
-  <footer className="w-full bg-gradient-to-r from-blue-700 via-purple-700 to-pink-700 text-white py-6 mt-12">
-    <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
+  <footer className="w-full bg-gradient-to-r from-blue-700 via-purple-700 to-pink-700 text-white py-6 mt-12 px-2 sm:px-4 md:px-8 lg:px-16">
+    <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
       <div className="text-center md:text-left">
         <div className="font-bold text-lg">&copy; {new Date().getFullYear()} All rights reserved.</div>
         <div className="text-sm mt-1">Made by <span className="font-semibold">Saurabh Kumar Jha</span></div>
-        <div className="text-xs mt-1">Contact: <a href="mailto:saurabhkumarjha011@gmail.com" className="underline hover:text-blue-200">saurabhkumarjha@gmail.com</a></div>
+        <div className="text-xs mt-1">Contact: <a href="mailto:saurabhkumarjha011@gmail.com" className="underline hover:text-blue-200">saurabhkumarjha011@gmail.com</a></div>
       </div>
       <div className="flex items-center gap-6 mt-2 md:mt-0">
         {socialLinks.map((link) => (

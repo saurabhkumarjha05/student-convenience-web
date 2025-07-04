@@ -1,30 +1,15 @@
-import React, { useEffect } from 'react';
+import React from 'react';
+import { useNotifications } from './NotificationContext';
 
-const Notification = ({ message, onClose, duration = 2000 }) => {
-  useEffect(() => {
-    if (!message) return;
-    const timer = setTimeout(onClose, duration);
-    return () => clearTimeout(timer);
-  }, [message, onClose, duration]);
-
-  if (!message) return null;
-
+const Notification = () => {
+  const { toast } = useNotifications();
+  if (!toast) return null;
   return (
-    <div className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50">
-      <div className="bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg text-base sm:text-lg font-semibold animate-fade-in-out">
-        {message}
-      </div>
-      <style>{`
-        @keyframes fade-in-out {
-          0% { opacity: 0; transform: translateY(-20px); }
-          10% { opacity: 1; transform: translateY(0); }
-          90% { opacity: 1; transform: translateY(0); }
-          100% { opacity: 0; transform: translateY(-20px); }
-        }
-        .animate-fade-in-out {
-          animation: fade-in-out ${duration}ms both;
-        }
-      `}</style>
+    <div className={`fixed top-6 right-6 z-50 px-6 py-3 rounded-lg shadow-lg text-white transition-all animate-fade-in ${toast.type === 'error' ? 'bg-red-600' : toast.type === 'success' ? 'bg-green-600' : 'bg-blue-600'}`}
+      role="alert"
+      aria-live="assertive"
+    >
+      {toast.message}
     </div>
   );
 };

@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useContext } from 'react';
 // import Navbar from '../components/Navbar';
 import { NotificationContext } from '../App';
+import { useNotifications } from '../components/NotificationContext';
 
 const Settings = ({ isLoggedIn, setIsLoggedIn }) => {
   const [notifications, setNotifications] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
   const [saved, setSaved] = useState(false);
-  const { showNotification } = useContext(NotificationContext);
+  const { showNotification } = useNotifications();
 
   // Load settings from localStorage on mount
   useEffect(() => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   BrowserRouter,
   Routes,
@@ -14,41 +14,48 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
+import LostFound from './pages/LostFound'; // ✅ ✅ NEW PAGE IMPORT
+import Delivery from './pages/Delivery';
+import Assignment from './pages/Assignment';
+import Notes from './pages/Notes';
+import Events from './pages/Events';
+import Forum from './pages/Forum';
+import Tools from './pages/Tools';
 
 import Layout from './components/Layout';
 import Notification from './components/Notification';
-import Footer from './components/Footer';
 import './index.css';
-
-export const NotificationContext = createContext();
+import { NotificationProvider } from './components/NotificationContext';
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    return localStorage.getItem('isLoggedIn') === 'true';
-  });
-  const [notification, setNotification] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorage.getItem('token'));
 
   useEffect(() => {
-    localStorage.setItem('isLoggedIn', isLoggedIn);
-  }, [isLoggedIn]);
-
-  const showNotification = (msg) => {
-    setNotification(msg);
-  };
+    const handleStorageChange = () => {
+      const token = localStorage.getItem('token');
+      setIsLoggedIn(!!token);
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   return (
-    <NotificationContext.Provider value={{ showNotification }}>
+    <NotificationProvider>
       <BrowserRouter>
-        <Notification message={notification} onClose={() => setNotification('')} />
+        <Notification />
         <Routes>
-          {/* ✅ Pages with Navbar */}
-          <Route
-            element={<Layout isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />}
-          >
+          {/* ✅ Layout with Navbar/Footer for main pages */}
+          <Route element={<Layout isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />}>
             <Route path="/" element={<Home isLoggedIn={isLoggedIn} />} />
             <Route
               path="/main-dashboard"
-              element={isLoggedIn ? <MainDashboard isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} /> : <Navigate to="/login" replace />}
+              element={
+                isLoggedIn ? (
+                  <MainDashboard isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
             />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
@@ -60,14 +67,42 @@ function App() {
               path="/settings"
               element={isLoggedIn ? <Settings /> : <Navigate to="/login" replace />}
             />
+            <Route
+              path="/lostfound"
+              element={isLoggedIn ? <LostFound isLoggedIn={isLoggedIn} /> : <Navigate to="/login" replace />}
+            />
+            <Route
+              path="/delivery"
+              element={isLoggedIn ? <Delivery /> : <Navigate to="/login" replace />}
+            />
+            <Route
+              path="/assignment"
+              element={isLoggedIn ? <Assignment /> : <Navigate to="/login" replace />}
+            />
+            <Route
+              path="/notes"
+              element={isLoggedIn ? <Notes /> : <Navigate to="/login" replace />}
+            />
+            <Route
+              path="/events"
+              element={isLoggedIn ? <Events /> : <Navigate to="/login" replace />}
+            />
+            <Route
+              path="/forum"
+              element={isLoggedIn ? <Forum /> : <Navigate to="/login" replace />}
+            />
+            <Route
+              path="/tools"
+              element={isLoggedIn ? <Tools /> : <Navigate to="/login" replace />}
+            />
           </Route>
-          {/* ❌ No Navbar on these */}
+
+          {/* ❌ Routes outside Layout */}
           <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
           <Route path="/signup" element={<Signup setIsLoggedIn={setIsLoggedIn} />} />
         </Routes>
-        <Footer />
       </BrowserRouter>
-    </NotificationContext.Provider>
+    </NotificationProvider>
   );
 }
 

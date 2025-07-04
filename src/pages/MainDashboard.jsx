@@ -1,84 +1,78 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FaBoxOpen, FaTruck, FaClipboardList, FaStickyNote, FaCalendarAlt, FaComments, FaTools } from 'react-icons/fa';
 
 const features = [
   {
-    title: 'Lost & Found',
-    icon: '📦',
-    description: 'Report or claim lost items on campus.',
-    color: 'bg-yellow-100',
+    name: 'Lost & Found',
+    icon: <FaBoxOpen className="text-blue-500 text-3xl" />,
     route: '/lostfound',
+    color: 'bg-blue-50',
   },
   {
-    title: 'Delivery Help',
-    icon: '🚚',
-    description: 'Get delivery assistance inside college.',
-    color: 'bg-blue-100',
+    name: 'Delivery',
+    icon: <FaTruck className="text-green-500 text-3xl" />,
     route: '/delivery',
+    color: 'bg-green-50',
   },
   {
-    title: 'Assignments',
-    icon: '📝',
-    description: 'Share and access assignments easily.',
-    color: 'bg-purple-100',
+    name: 'Assignment',
+    icon: <FaClipboardList className="text-yellow-500 text-3xl" />,
     route: '/assignment',
+    color: 'bg-yellow-50',
   },
   {
-    title: 'Notes',
-    icon: '📚',
-    description: 'Upload and download subject notes.',
-    color: 'bg-green-100',
+    name: 'Notes',
+    icon: <FaStickyNote className="text-purple-500 text-3xl" />,
     route: '/notes',
+    color: 'bg-purple-50',
   },
   {
-    title: 'Events',
-    icon: '📅',
-    description: 'Know about upcoming college events.',
-    color: 'bg-pink-100',
+    name: 'Events',
+    icon: <FaCalendarAlt className="text-pink-500 text-3xl" />,
     route: '/events',
+    color: 'bg-pink-50',
   },
   {
-    title: 'Forum',
-    icon: '💬',
-    description: 'Discuss doubts and share info with peers.',
-    color: 'bg-indigo-100',
+    name: 'Forum',
+    icon: <FaComments className="text-indigo-500 text-3xl" />,
     route: '/forum',
+    color: 'bg-indigo-50',
   },
   {
-    title: 'Tools',
-    icon: '🛠️',
-    description: 'Useful utilities like GPA calculator, etc.',
-    color: 'bg-red-100',
+    name: 'Tools',
+    icon: <FaTools className="text-gray-500 text-3xl" />,
     route: '/tools',
+    color: 'bg-gray-50',
   },
 ];
 
-const MainDashboard = ({ isLoggedIn, setIsLoggedIn }) => {
+const MainDashboard = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!isLoggedIn) {
-      navigate('/login');
-    }
-  }, [isLoggedIn, navigate]);
+    setLoading(true);
+    const t = setTimeout(() => setLoading(false), 1000);
+    return () => clearTimeout(t);
+  }, []);
+
+  if (loading) return <div className="flex items-center justify-center min-h-screen"><span className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600" aria-label="Loading" /></div>;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-200 via-purple-200 to-pink-200 px-2 sm:px-0">
-      <div className="container max-w-7xl mx-auto px-2 sm:px-4 py-8">
-        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-blue-800 mb-8 sm:mb-10 text-center">Welcome to Your Campus Dashboard</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
-          {features.map((item, index) => (
-            <div
-              key={index}
-              className={`w-full rounded-xl p-5 sm:p-6 shadow-md hover:shadow-lg hover:scale-105 transition duration-300 cursor-pointer flex flex-col items-center ${item.color}`}
-              onClick={() => navigate(item.route)}
-            >
-              <div className="text-4xl sm:text-5xl mb-3 sm:mb-4">{item.icon}</div>
-              <h3 className="text-lg sm:text-xl font-semibold mb-1 sm:mb-2">{item.title}</h3>
-              <p className="text-gray-700 text-center text-sm sm:text-base">{item.description}</p>
-            </div>
-          ))}
-        </div>
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center py-8 px-2 sm:px-4 md:px-8 lg:px-16">
+      <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-8 text-blue-800">Student Dashboard</h1>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 lg:gap-12 w-full max-w-5xl">
+        {features.map((feature) => (
+          <button
+            key={feature.name}
+            onClick={() => navigate(feature.route)}
+            className={`flex flex-col items-center justify-center rounded-xl shadow-md p-8 transition hover:scale-105 hover:shadow-lg focus:outline-none ${feature.color}`}
+          >
+            {feature.icon}
+            <span className="mt-4 text-lg font-semibold text-gray-700">{feature.name}</span>
+          </button>
+        ))}
       </div>
     </div>
   );
