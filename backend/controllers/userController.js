@@ -9,7 +9,8 @@ const ForumPost = require('../models/ForumPost');
 // @access  Private
 exports.getProfile = async (req, res) => {
   try {
-    console.log('getProfile called for user:', req.user); // Debug log
+    // Remove or comment out the debug log in getProfile
+    // console.log('getProfile called for user:', req.user); // Debug log
     const userId = req.user.id;
     const user = await User.findById(userId).select('-password');
     if (!user) return res.status(404).json({ message: 'User not found' });
@@ -136,4 +137,99 @@ exports.getLeaderboard = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: 'Failed to fetch leaderboard', error: err.message });
   }
-}; 
+};
+
+exports.getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find({}, 'firstName lastName profilePic _id');
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to fetch users', error: err.message });
+  }
+};
+
+exports.getUserActivity = async (req, res) => {
+  try {
+    // Only public activity, e.g., posts, comments, returns, etc.
+    const userId = req.params.userId;
+    // Example: fetch forum posts and lost/found actions
+    const posts = await ForumPost.find({ user: userId }).sort({ createdAt: -1 }).limit(10);
+    // You can add more activity sources here
+    const activity = [
+      ...posts.map(post => ({ type: 'post', description: `Posted in forum: ${post.title}`, date: post.createdAt }))
+      // Add more activity types as needed
+    ];
+    res.json(activity);
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to fetch user activity', error: err.message });
+  }
+};
+
+// Get public profile by userId (no personal info)
+exports.getPublicProfile = async (req, res) => {
+  try {
+    const user = await User.findOne({ userId: req.params.userId }).select('firstName lastName userId profilePic _id');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to fetch public profile', error: err.message });
+  }
+};
+
+// Get friend status
+exports.getFriendStatus = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const otherId = req.params.userId;
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    if (user.friends?.includes(otherId)) return res.json({ status: 'friends' });
+    if (user.friendRequests?.includes(otherId)) return res.json({ status: 'pending' });
+    res.json({ status: 'none' });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to fetch friend status', error: err.message });
+  }
+};
+
+// Add friend request
+exports.addFriendRequest = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const otherId = req.params.userId;
+    if (userId.toString() === otherId) return res.status(400).json({ message: 'Cannot add yourself' });
+    const user = await User.findById(userId);
+    const other = await User.findById(otherId);
+    if (!user || !other) return res.status(404).json({ message: 'User not found' });
+    if (user.friends?.includes(otherId)) return res.status(400).json({ message: 'Already friends' });
+    if (other.friendRequests?.includes(userId)) return res.status(400).json({ message: 'Request already sent' });
+    other.friendRequests = other.friendRequests || [];
+    other.friendRequests.push(userId);
+    await other.save();
+    res.json({ message: 'Friend request sent' });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to send friend request', error: err.message });
+  }
+};
+
+// PATCH /api/user/username
+exports.setUsername = async (req, res) => {
+  const userId = req.user.id;
+  const { username } = req.body;
+
+  if (!username || username.length < 3) {
+    return res.status(400).json({ message: 'Username is required and must be at least 3 characters' });
+  }
+
+  try {
+    const existing = await User.findOne({ username });
+    if (existing) {
+      return res.status(409).json({ message: 'Username already taken' });
+    }
+
+    const user = await User.findByIdAndUpdate(userId, { username }, { new: true });
+    return res.status(200).json({ message: 'Username set successfully', user });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Error setting username', error: err.message });
+  }
+};

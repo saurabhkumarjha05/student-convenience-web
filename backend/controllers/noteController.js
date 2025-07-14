@@ -1,31 +1,46 @@
 const Note = require('../models/Note');
+const path = require('path');
 
-exports.createNote = async (req, res) => {
+// Upload a new note (PDF)
+exports.uploadNote = async (req, res) => {
   try {
-    const noteData = { ...req.body, user: req.user.id };
-    if (req.file) {
-      noteData.fileUrl = `/uploads/notes/${req.file.filename}`;
-    }
-    const note = new Note(noteData);
-    await note.save();
+    if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
+    const { subject, title, chapter, branch } = req.body;
+    const fileUrl = `/uploads/notes/${req.file.filename}`;
+    const note = await Note.create({
+      userId: req.user.id,
+      subject,
+      title,
+      chapter,
+      branch,
+      fileUrl,
+      createdAt: new Date()
+    });
     res.status(201).json(note);
   } catch (err) {
-    res.status(500).json({ message: 'Failed to create note', error: err.message });
+    res.status(500).json({ message: 'Failed to upload note', error: err.message });
   }
 };
 
-exports.getNotes = async (req, res) => {
+// Get all notes (with optional filters)
+exports.getAllNotes = async (req, res) => {
   try {
-    const notes = await Note.find({ user: req.user.id }).sort({ createdAt: -1 });
+    const { subject, branch, uploader } = req.query;
+    const filter = {};
+    if (subject) filter.subject = subject;
+    if (branch) filter.branch = branch;
+    if (uploader) filter.userId = uploader;
+    const notes = await Note.find(filter).populate('userId', 'firstName lastName email').sort({ createdAt: -1 });
     res.json(notes);
   } catch (err) {
     res.status(500).json({ message: 'Failed to fetch notes', error: err.message });
   }
 };
 
+// Get a single note by ID
 exports.getNoteById = async (req, res) => {
   try {
-    const note = await Note.findOne({ _id: req.params.id, user: req.user.id });
+    const note = await Note.findById(req.params.id).populate('userId', 'firstName lastName email');
     if (!note) return res.status(404).json({ message: 'Note not found' });
     res.json(note);
   } catch (err) {

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const verifyToken = require('../middleware/authMiddleware');
-const forumController = require('../controllers/forumController');
+const { getForumPosts, getForumPostById, createForumPost, updateForumPost, deleteForumPost, getUserPosts } = require('../controllers/forumController');
 const multer = require('multer');
 const path = require('path');
 
@@ -16,10 +16,11 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-router.post('/', verifyToken, upload.single('file'), forumController.createForumPost);
-router.get('/', verifyToken, forumController.getForumPosts);
-router.get('/:id', verifyToken, forumController.getForumPostById);
-router.put('/:id', verifyToken, forumController.updateForumPost);
-router.delete('/:id', verifyToken, forumController.deleteForumPost);
+router.post('/', verifyToken, upload.single('file'), createForumPost);
+router.get('/', verifyToken, getForumPosts);
+router.get('/:id', verifyToken, getForumPostById);
+router.put('/:id', verifyToken, updateForumPost);
+router.delete('/:id', verifyToken, deleteForumPost);
+router.get('/user/:userId/posts', verifyToken, getUserPosts);
 
 module.exports = router; 

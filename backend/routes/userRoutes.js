@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const verifyToken = require('../middleware/authMiddleware');
-const { getProfile, uploadProfilePic, updateProfile, getActivityTimeline, getLeaderboard } = require('../controllers/userController');
+const { getProfile, uploadProfilePic, updateProfile, getActivityTimeline, getLeaderboard, getAllUsers, getUserActivity, getPublicProfile, getFriendStatus, addFriendRequest, setUsername } = require('../controllers/userController');
 const multer = require('multer');
 const path = require('path');
 const upload = multer({
@@ -35,7 +35,35 @@ router.get('/activity-timeline', verifyToken, getActivityTimeline);
 // @access  Private
 router.get('/leaderboard', verifyToken, getLeaderboard);
 
+// Add route to get all users
+router.get('/all', verifyToken, getAllUsers);
+
 // Global search route
 router.get('/search', verifyToken, searchController.searchAll);
+
+// @route   GET /api/:userId/activity
+// @desc    Get user activity for a specific user
+// @access  Private
+router.get('/:userId/activity', verifyToken, getUserActivity);
+
+// @route   GET /api/user/public/:userId
+// @desc    Get public profile of a user
+// @access  Public
+router.get('/public/:userId', getPublicProfile);
+
+// @route   GET /api/:userId/friend-status
+// @desc    Get friend status of a user
+// @access  Private
+router.get('/:userId/friend-status', verifyToken, getFriendStatus);
+
+// @route   POST /api/:userId/add-friend
+// @desc    Add a friend request to a user
+// @access  Private
+router.post('/:userId/add-friend', verifyToken, addFriendRequest);
+
+// @route   PATCH /api/user/username
+// @desc    Set a unique username for the user
+// @access  Private
+router.patch('/username', verifyToken, setUsername);
 
 module.exports = router; 

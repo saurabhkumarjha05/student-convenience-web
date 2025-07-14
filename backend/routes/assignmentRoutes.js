@@ -11,20 +11,27 @@ const storage = multer.diskStorage({
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + '-' + file.originalname);
+    cb(null, uniqueSuffix + '-' + file.originalname.replace(/\s+/g, '_'));
   }
 });
-const upload = multer({ storage });
+const upload = multer({ storage, fileFilter: (req, file, cb) => {
+  // Allow PDF, images for request; PDF/ZIP for submission
+  const allowed = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg', 'application/zip', 'application/x-zip-compressed'];
+  if (allowed.includes(file.mimetype)) cb(null, true);
+  else cb(new Error('Only PDF, image, or ZIP files are allowed!'));
+}});
 
-// Create assignment (with file upload)
+// Create a new assignment request
 router.post('/', verifyToken, upload.single('file'), assignmentController.createAssignment);
-// List all assignments
-router.get('/', verifyToken, assignmentController.getAssignments);
-// Get one assignment
-router.get('/:id', verifyToken, assignmentController.getAssignmentById);
-// Update assignment
-router.put('/:id', verifyToken, assignmentController.updateAssignment);
-// Delete assignment
-router.delete('/:id', verifyToken, assignmentController.deleteAssignment);
+// Get all assignments (for helpers/admins)
+router.get('/', verifyToken, assignmentController.getAllAssignments);
+// Get assignments created by the logged-in user
+router.get('/my', verifyToken, assignmentController.getMyAssignments);
+// Helper accepts an assignment
+router.put('/:id/accept', verifyToken, assignmentController.acceptAssignment);
+// Helper submits completed work
+router.put('/:id/submit', verifyToken, upload.single('file'), assignmentController.submitAssignment);
+// Student marks assignment as received/completed
+router.put('/:id/status', verifyToken, assignmentController.updateAssignmentStatus);
 
 module.exports = router;

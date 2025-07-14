@@ -60,4 +60,14 @@ exports.deleteForumPost = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: 'Failed to delete post', error: err.message });
   }
+};
+
+// Get all posts by a specific user
+exports.getUserPosts = async (req, res) => {
+  try {
+    const posts = await ForumPost.find({ user: req.params.userId }).sort({ createdAt: -1 });
+    res.json(posts);
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to fetch user posts', error: err.message });
+  }
 }; 

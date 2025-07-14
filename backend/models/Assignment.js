@@ -1,11 +1,17 @@
 const mongoose = require('mongoose');
 
-const assignmentSchema = new mongoose.Schema({
-  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+const AssignmentSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // requester
   subject: { type: String, required: true },
+  description: { type: String },
+  deadline: { type: Date, required: true },
+  urgency: { type: String, enum: ['Immediate', 'Within 24 hrs', 'Flexible'], required: true },
   fileUrl: { type: String },
-  deadline: { type: Date },
-  description: { type: String }
-}, { timestamps: true });
+  status: { type: String, enum: ['pending', 'accepted', 'completed'], default: 'pending' },
+  acceptedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  submittedFile: { type: String }, // completed work
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+});
 
-module.exports = mongoose.model('Assignment', assignmentSchema); 
+module.exports = mongoose.model('Assignment', AssignmentSchema); 

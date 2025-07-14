@@ -37,6 +37,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: 'Student'
     },
+    userId: { type: String, unique: true, sparse: true }, // Permanent unique user ID
 
     // ✅ Optional references to user activities
     lostItems: [
